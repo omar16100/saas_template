@@ -1,5 +1,10 @@
 # SaaS Template
 
+[![Website](https://img.shields.io/badge/website-omar16100.github.io-f38020)](https://omar16100.github.io/saas_template/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+**Website:** https://omar16100.github.io/saas_template/
+
 Opinionated, Cloudflare-first SaaS starter. Clone, rename, deploy.
 
 **Stack:** Next.js 16 (App Router) on Cloudflare Workers via `@opennextjs/cloudflare` · D1 + Drizzle · Better Auth (passkeys, MFA, OAuth, magic links) · Stripe hosted Checkout + Portal · Resend + CF Email Routing · shadcn/ui + Tailwind · GA4 + PostHog + CF Web Analytics (consent-gated) · Turnstile · Axiom via Logpush · Vitest + Playwright · GitHub Actions CI/CD.
