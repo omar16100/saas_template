@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://omar16100.github.io/saas_template/sitemap.xml

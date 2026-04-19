@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>saas_template — Cloudflare-first SaaS starter</title>
+<meta name="description" content="Opinionated Cloudflare-first SaaS starter. Next.js 16 + D1 + Better Auth + Stripe. SEO-first, swappable, production-ready." />
+<link rel="canonical" href="https://omar16100.github.io/saas_template/" />
+<meta property="og:title" content="saas_template" />
+<meta property="og:description" content="Cloudflare-first SaaS starter. Clone, rename, deploy." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://omar16100.github.io/saas_template/" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root { color-scheme: light dark; --fg: #0a0a0a; --bg: #fafafa; --muted: #666; --accent: #f38020; --border: #e5e5e5; --card: #fff; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #fafafa; --bg: #0a0a0a; --muted: #999; --border: #222; --card: #111; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 4rem 1.5rem; }
+  header { text-align: center; margin-bottom: 3rem; }
+  header .kicker { text-transform: uppercase; letter-spacing: .1em; font-size: .75rem; color: var(--accent); font-weight: 600; }
+  h1 { font-size: clamp(2.25rem, 5vw, 3.5rem); margin: .5rem 0 1rem; letter-spacing: -.02em; line-height: 1.1; }
+  h2 { font-size: 1.5rem; margin: 2.5rem 0 1rem; letter-spacing: -.01em; }
+  h3 { font-size: 1rem; margin: 1.5rem 0 .5rem; }
+  .lead { font-size: 1.2rem; color: var(--muted); max-width: 36rem; margin: 0 auto; }
+  .ctas { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
+  a.btn { text-decoration: none; padding: .75rem 1.25rem; border-radius: 8px; font-weight: 600; font-size: .95rem; border: 1px solid var(--border); }
+  a.btn.primary { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  a.btn:hover { transform: translateY(-1px); }
+  pre { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; overflow-x: auto; font-size: .9rem; }
+  code { font: inherit; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+  p code, li code { background: var(--card); border: 1px solid var(--border); padding: .1em .35em; border-radius: 4px; }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 1rem; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .card h3 { margin: 0 0 .5rem; font-size: .95rem; }
+  .card p { margin: 0; color: var(--muted); font-size: .9rem; }
+  .badges { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+  .badge { display: inline-block; padding: .2rem .6rem; border: 1px solid var(--border); border-radius: 999px; font-size: .75rem; color: var(--muted); background: var(--card); }
+  footer { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: .85rem; }
+  footer a { color: inherit; }
+  ul.clean { list-style: none; padding: 0; }
+  ul.clean li { padding: .35rem 0; border-bottom: 1px solid var(--border); font-size: .95rem; }
+  ul.clean li:last-child { border: 0; }
+  ul.clean li::before { content: "→ "; color: var(--accent); }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <div class="kicker">Open source template</div>
+    <h1>saas_template</h1>
+    <p class="lead">Cloudflare-first SaaS starter. Next.js 16 + D1 + Better Auth + Stripe. Opinionated, SEO-first, swappable.</p>
+    <div class="badges">
+      <span class="badge">Next.js 16</span>
+      <span class="badge">Cloudflare Workers</span>
+      <span class="badge">D1 + Drizzle</span>
+      <span class="badge">Better Auth</span>
+      <span class="badge">Stripe</span>
+      <span class="badge">Resend</span>
+      <span class="badge">shadcn/ui</span>
+      <span class="badge">MIT</span>
+    </div>
+    <div class="ctas">
+      <a class="btn primary" href="https://github.com/omar16100/saas_template">View on GitHub</a>
+      <a class="btn" href="https://github.com/omar16100/saas_template#quick-start">Quick start</a>
+      <a class="btn" href="https://github.com/omar16100/saas_template/blob/main/docs/setup.md">Full setup</a>
+    </div>
+  </header>
+
+  <section>
+    <h2>Quick start</h2>
+    <pre><code>git clone https://github.com/omar16100/saas_template.git my-saas
+cd my-saas
+pnpm install
+cp .env.example .env.local
+# fill BETTER_AUTH_SECRET: openssl rand -base64 32
+pnpm dev</code></pre>
+  </section>
+
+  <section>
+    <h2>What's inside</h2>
+    <div class="grid">
+      <div class="card"><h3>Auth</h3><p>Better Auth — email/password, Google OAuth, magic links, passkeys, 2FA.</p></div>
+      <div class="card"><h3>Billing</h3><p>Stripe hosted Checkout + Portal, webhook with D1 idempotency, Stripe Tax.</p></div>
+      <div class="card"><h3>Email</h3><p>Resend outbound + react-email templates. CF Email Routing inbound.</p></div>
+      <div class="card"><h3>DB</h3><p>D1 + Drizzle with a repository layer — swap to Postgres/Turso without touching domain code.</p></div>
+      <div class="card"><h3>SEO</h3><p>SSG marketing, dynamic sitemap, JSON-LD, IndexNow, llms.txt, Lighthouse CI.</p></div>
+      <div class="card"><h3>Security</h3><p>Route-scoped CSP, HSTS, Turnstile, D1 rate limiter, account delete + export.</p></div>
+      <div class="card"><h3>Analytics</h3><p>Consent-gated GA4 + PostHog + CF Web Analytics. Web vitals → PostHog.</p></div>
+      <div class="card"><h3>Ops</h3><p>Structured logs → Axiom via Logpush. CI + deploy (preview per PR, prod on main).</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Why</h2>
+    <ul class="clean">
+      <li>One platform — compute, DB, files, cache, queues, email routing all on Cloudflare.</li>
+      <li>Stripe hosted Checkout keeps PCI scope at zero and CSP simple.</li>
+      <li>D1 with a repo boundary is cheap today, swappable later.</li>
+      <li>Flat app — no monorepo tax until you genuinely need one.</li>
+      <li>Better Auth without custom CSRF — one layer, not two that fight each other.</li>
+      <li>SSG for SEO pages always — crawlers see instant HTML, cache misses never hit origin.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Deployment</h2>
+    <pre><code>pnpm deploy:preview   # wrangler deploy --env preview
+pnpm deploy           # wrangler deploy --env production</code></pre>
+    <p>GitHub Actions runs this for you: preview on every PR, production on merge to <code>main</code>. See <a href="https://github.com/omar16100/saas_template/blob/main/docs/setup.md">docs/setup.md</a> for the full post-deploy checklist (DNS, Stripe webhooks, Resend DKIM, Turnstile, GSC/Bing verification).</p>
+  </section>
+
+  <section>
+    <h2>Docs</h2>
+    <ul class="clean">
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/setup.md">Setup</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/c4model.md">C4 architecture</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/runbooks/d1-escape-hatch.md">Runbook: D1 escape hatch (Postgres/Turso)</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/runbooks/stripe-preview-isolation.md">Runbook: Stripe preview isolation</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/runbooks/passkey-preview-domains.md">Runbook: passkeys & preview domains</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/runbooks/backup-restore.md">Runbook: backup & restore</a></li>
+      <li><a href="https://github.com/omar16100/saas_template/blob/main/docs/adr/001-cloudflare-flat-repo.md">ADR-001: Cloudflare-first, flat repo</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    MIT · <a href="https://github.com/omar16100/saas_template">github.com/omar16100/saas_template</a>
+  </footer>
+</main>
+</body>
+</html>
