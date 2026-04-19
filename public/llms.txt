@@ -1,0 +1,13 @@
+# SaaS Template
+
+> Cloudflare-first SaaS starter.
+
+## Key pages
+- /: Landing
+- /pricing: Pricing & plans
+- /blog: Blog
+- /privacy: Privacy policy
+- /terms: Terms of service
+
+## About
+Replace this with a short description of your product, target audience, and core value prop for AI search citations.

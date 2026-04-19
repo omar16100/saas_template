@@ -1,0 +1,115 @@
+name = "saas-template"
+main = ".open-next/worker.js"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+assets = { directory = ".open-next/assets", binding = "ASSETS" }
+
+# ===== Default env used for local dev; override per-env below =====
+[vars]
+NEXT_PUBLIC_APP_URL = "http://localhost:3000"
+NEXT_PUBLIC_APP_NAME = "SaaS Template"
+NEXT_PUBLIC_IS_PREVIEW = "false"
+BETTER_AUTH_RP_ID = "localhost"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "saas_db"
+database_id = "REPLACE_AFTER_WRANGLER_D1_CREATE"
+migrations_dir = "db/migrations"
+
+[[r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "saas-uploads"
+
+[[r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "saas-next-cache"
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_AFTER_WRANGLER_KV_CREATE"
+
+[[queues.producers]]
+binding = "JOBS"
+queue = "saas-jobs"
+
+[[queues.consumers]]
+queue = "saas-jobs"
+max_batch_size = 10
+max_batch_timeout = 5
+dead_letter_queue = "saas-jobs-dlq"
+
+[observability]
+enabled = true
+
+# ===== Preview =====
+[env.preview]
+name = "saas-template-preview"
+
+[env.preview.vars]
+NEXT_PUBLIC_APP_URL = "https://preview.example.com"
+NEXT_PUBLIC_IS_PREVIEW = "true"
+BETTER_AUTH_RP_ID = "preview.example.com"
+
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "saas_db_preview"
+database_id = "REPLACE_ME"
+migrations_dir = "db/migrations"
+
+[[env.preview.r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "saas-uploads-preview"
+
+[[env.preview.r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "saas-next-cache-preview"
+
+[[env.preview.kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_ME"
+
+[[env.preview.queues.producers]]
+binding = "JOBS"
+queue = "saas-jobs-preview"
+
+[[env.preview.queues.consumers]]
+queue = "saas-jobs-preview"
+dead_letter_queue = "saas-jobs-preview-dlq"
+
+# ===== Production =====
+[env.production]
+name = "saas-template-prod"
+routes = [{ pattern = "example.com/*", zone_name = "example.com" }]
+
+[env.production.vars]
+NEXT_PUBLIC_APP_URL = "https://example.com"
+NEXT_PUBLIC_IS_PREVIEW = "false"
+BETTER_AUTH_RP_ID = "example.com"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "saas_db"
+database_id = "REPLACE_ME"
+migrations_dir = "db/migrations"
+
+[[env.production.r2_buckets]]
+binding = "UPLOADS"
+bucket_name = "saas-uploads"
+
+[[env.production.r2_buckets]]
+binding = "NEXT_INC_CACHE_R2_BUCKET"
+bucket_name = "saas-next-cache"
+
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+id = "REPLACE_ME"
+
+[[env.production.queues.producers]]
+binding = "JOBS"
+queue = "saas-jobs"
+
+[[env.production.queues.consumers]]
+queue = "saas-jobs"
+dead_letter_queue = "saas-jobs-dlq"
