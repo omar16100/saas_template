@@ -22,7 +22,7 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 1. PR `fix/ci`: workflow fixes, lockfile, ESLint flat config, script fixes, the code fixes above with unit tests, deploy skips cleanly without credentials, remove `renovate.json`, ignore eslint majors in Dependabot, README/LICENSE/doc corrections.
 2. After it merges: GitHub Actions bumps (#1 setup-node 6, #2 pnpm/action-setup 6, #9 checkout 7), rebased, merged when green.
 3. Remove unused `react-hook-form` + `@hookform/resolvers` (never imported) and close #5 as superseded.
-4. zod 4 (#7) with `lib/env.ts` moved to v4 idioms.
+4. zod 4 (#7) with `lib/env.ts` moved to v4 idioms (`z.url()`, `z.email()`, `z.flattenError()`). Done on branch `deps/zod-4` at zod ^4.6.5 (newer than #7's 4.3.6), superseding #7 and its replacement #15; also clears better-call's zod ^4 peer warning. `NEXT_PUBLIC_IS_PREVIEW` keeps the exact-`"true"` transform instead of `z.stringbool()` so it matches middleware.ts.
 5. drizzle-kit 0.31 (#6) together with a drizzle-orm version that better-auth's drizzle adapter accepts.
 6. stripe 22 (#8) in a dedicated PR: real `apiVersion` from the installed package, no `as never`.
 7. Close eslint 10 (#4): eslint-plugin-react 7.37.5 (via eslint-config-next 16.3.6) crashes under eslint 10 (`contextOrFilename.getFilename is not a function`).
@@ -45,7 +45,9 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 - [x] Step 1 merged as #10; `main` ci and deploy runs green (deploy job skipped, no secrets).
 - [x] Step 7: #4 closed by Dependabot once the eslint major ignore landed; reason commented on the PR.
 - [x] Step 3: react-hook-form + @hookform/resolvers removed (no imports anywhere); #5 closed as superseded.
-- [ ] Steps 2, 4, 5, 6.
+- [x] Step 2: #9 (checkout 7), #11 (setup-node 7, Dependabot replaced #1 with it) and #2 (pnpm/action-setup 6, no `version:` input) merged green.
+- [x] Step 4: zod 4.6.5 PR (supersedes #7 / #15).
+- [ ] Steps 5, 6.
 
 ## Deviations
 - The Stripe `current_period_end` fix moved into PR 1 because stripe 18 (already installed) fails typecheck without it. The stripe 22 PR only changes the version and `apiVersion`.

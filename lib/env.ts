@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const envSchema = z.object({
-  NEXT_PUBLIC_APP_URL: z.string().url(),
+  NEXT_PUBLIC_APP_URL: z.url(),
   NEXT_PUBLIC_APP_NAME: z.string().default("SaaS Template"),
   // Only the exact string "true" enables preview mode (same rule as middleware.ts); z.coerce.boolean() would turn "false" into true.
   NEXT_PUBLIC_IS_PREVIEW: z.string().optional().transform((v) => v === "true"),
 
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
-  BETTER_AUTH_URL: z.string().url().optional(),
+  BETTER_AUTH_URL: z.url().optional(),
   BETTER_AUTH_RP_ID: z.string().default("localhost"),
 
   GOOGLE_CLIENT_ID: z.string().optional(),
@@ -20,14 +20,14 @@ export const envSchema = z.object({
   STRIPE_PRICE_PRO_YEARLY: z.string().optional(),
 
   RESEND_API_KEY: z.string().optional(),
-  RESEND_FROM_EMAIL: z.string().email().optional(),
+  RESEND_FROM_EMAIL: z.email().optional(),
 
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
   TURNSTILE_SECRET_KEY: z.string().optional(),
 
   NEXT_PUBLIC_GA4_ID: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-  NEXT_PUBLIC_POSTHOG_HOST: z.string().url().optional(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.url().optional(),
 
   GOOGLE_SITE_VERIFICATION: z.string().optional(),
   BING_SITE_VERIFICATION: z.string().optional(),
@@ -69,7 +69,7 @@ function parseEnv(): Env {
   });
 
   if (!parsed.success) {
-    console.error("Invalid environment variables:", parsed.error.flatten().fieldErrors);
+    console.error("Invalid environment variables:", z.flattenError(parsed.error).fieldErrors);
     throw new Error("Invalid environment variables");
   }
   return parsed.data;
