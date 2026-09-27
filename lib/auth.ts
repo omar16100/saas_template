@@ -5,6 +5,7 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 import { magicLink } from "better-auth/plugins";
 import { db } from "./db";
 import { env } from "./env";
+import { describeError, log, logBetterAuthEvent } from "./logger";
 import { sendMagicLinkEmail, sendVerifyEmail, sendResetEmail } from "./resend";
 
 const isPreview = env.NEXT_PUBLIC_IS_PREVIEW;
@@ -16,6 +17,10 @@ export function getAuth() {
   return betterAuth({
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
+    logger: { log: logBetterAuthEvent },
+    // Unexpected (non-API) errors are rethrown to handleAuthRequest; otherwise better-call prints them
+    // raw with console.error, and drizzle query errors carry bound values such as tokens.
+    onAPIError: { throw: true },
     trustedOrigins: [env.NEXT_PUBLIC_APP_URL],
     database: drizzleAdapter(db(), { provider: "sqlite" }),
     emailAndPassword: {
@@ -65,3 +70,19 @@ export function getAuth() {
 
 export type Auth = ReturnType<typeof getAuth>;
 export type Session = Auth["$Infer"]["Session"];
+
+// Handler for app/api/auth/[...all]. API errors already come back as responses; anything else is
+// logged without query parameters and answered with a bare 500.
+export async function handleAuthRequest(request: Request): Promise<Response> {
+  try {
+    return await getAuth().handler(request);
+  } catch (err) {
+    try {
+      log.error("auth_request_failed", { error: describeError(err) });
+    } catch {
+      // The response must not depend on the error being describable.
+      log.error("auth_request_failed", { error: "undescribable" });
+    }
+    return new Response(null, { status: 500 });
+  }
+}
