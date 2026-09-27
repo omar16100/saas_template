@@ -1,10 +1,10 @@
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "./sign-out-button";
 
 export default async function DashboardPage() {
-  const session = await auth.api.getSession({ headers: await headers() });
+  const session = await getAuth().api.getSession({ headers: await headers() });
   const user = session?.user;
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">

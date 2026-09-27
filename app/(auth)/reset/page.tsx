@@ -9,7 +9,7 @@ export default function ResetPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await authClient.forgetPassword({ email, redirectTo: "/reset/confirm" });
+    await authClient.requestPasswordReset({ email, redirectTo: "/reset/confirm" });
     setSent(true);
   }
 

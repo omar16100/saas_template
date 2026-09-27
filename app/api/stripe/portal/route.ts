@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { createPortalSession } from "@/lib/stripe";
 import { repos } from "@/db/repo/d1";
 import { env } from "@/lib/env";
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession({ headers: req.headers });
+  const session = await getAuth().api.getSession({ headers: req.headers });
   if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const user = await repos.users.findById(session.user.id);

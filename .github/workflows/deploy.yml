@@ -4,21 +4,65 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  deploy:
+  # Deploys only when the Cloudflare credentials exist, so forks, Dependabot PRs and
+  # fresh copies of the template skip cleanly instead of failing.
+  config:
     runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=deploy skipped::Set repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to enable deploys."
+          fi
+
+  deploy:
+    needs: config
+    if: needs.config.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # NEXT_PUBLIC_* values are inlined at build time, so each target gets its own build
+    # with variables from the matching GitHub environment.
+    environment: ${{ github.event_name == 'pull_request' && 'preview' || 'production' }}
     permissions: { contents: read, deployments: write }
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
+      # pnpm version comes from the packageManager field in package.json.
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - name: Export NEXT_PUBLIC_* variables for the build
+        env:
+          VARS_JSON: ${{ toJSON(vars) }}
+          IS_PREVIEW: ${{ github.event_name == 'pull_request' }}
+        run: |
+          if ! printf '%s' "$VARS_JSON" | jq -e '.NEXT_PUBLIC_APP_URL // "" | length > 0' > /dev/null; then
+            echo "::error::Set variable NEXT_PUBLIC_APP_URL in the GitHub environment for this deploy."
+            exit 1
+          fi
+          # GITHUB_ENV is line based, so a value with a line break could inject other variables.
+          if ! printf '%s' "$VARS_JSON" | jq -e '[to_entries[] | select((.key | startswith("NEXT_PUBLIC_")) and (.value | test("[\\r\\n]")))] | length == 0' > /dev/null; then
+            echo "::error::NEXT_PUBLIC_* variables must be single-line."
+            exit 1
+          fi
+          printf '%s' "$VARS_JSON" | jq -r 'to_entries[] | select((.key | startswith("NEXT_PUBLIC_")) and .value != "") | "\(.key)=\(.value)"' >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_IS_PREVIEW=$IS_PREVIEW" >> "$GITHUB_ENV"
+      - run: pnpm build:worker
       - name: Deploy to preview
         if: github.event_name == 'pull_request'
         run: pnpm wrangler deploy --env preview

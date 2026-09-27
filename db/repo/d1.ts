@@ -1,4 +1,4 @@
-import { eq, and, gt, isNull } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db as getDb } from "@/lib/db";
 import { user, subscription, entitlement, stripeEvents } from "@/db/schema";
 import type { Repos, UserRepo, BillingRepo, EntitlementRepo } from "./index";

@@ -3,6 +3,10 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule: { interval: "weekly" }
+    ignore:
+      # eslint majors wait until eslint-config-next and its plugins support them.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule: { interval: "weekly" }

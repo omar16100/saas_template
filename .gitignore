@@ -13,3 +13,4 @@ test-results
 dist
 .vercel
 cloudflare-env.d.ts
+*.tsbuildinfo

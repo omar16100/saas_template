@@ -26,3 +26,19 @@
 - [ ] Unlighthouse cron
 - [ ] Newsletter (Resend Broadcasts)
 - [ ] Status page
+
+## ci + dependency maintenance (27 Sep 2026, plan: docs/27092026_ci_and_deps_plan.md)
+- [x] CI: drop pnpm `version` input, commit pnpm-lock.yaml, ESLint flat config, `drizzle-kit generate --config`, mandatory `pnpm build:worker`, Lighthouse non-blocking against `next start`
+- [x] `pnpm build` is `next build` (was recursive `opennextjs-cloudflare build`); `build:worker` added
+- [x] typecheck runs `wrangler types` first; passkeys from `@better-auth/passkey`; `requestPasswordReset`
+- [x] Stripe `current_period_end` read from subscription items (+ unit test)
+- [x] Better Auth built per request via `getAuth()` (+ unit test that import does not touch the CF context)
+- [x] deploy.yml skips cleanly without the Cloudflare secrets; when enabled it builds per GitHub environment (`preview` / `production`) with that environment's `NEXT_PUBLIC_*` vars and fails if `NEXT_PUBLIC_APP_URL` is missing
+- [x] `NEXT_PUBLIC_IS_PREVIEW="false"` no longer parses as true (+ unit test)
+- [ ] canonical: root layout sets `/` for every page without an override (pricing, blog index, auth pages)
+- [x] renovate.json removed (Dependabot only); eslint majors ignored
+- [ ] Dependabot: actions bumps (#1, #2, #9), zod 4 (#7), drizzle-kit 0.31 + drizzle-orm (#6), stripe 22 (#8); drop unused react-hook-form + @hookform/resolvers (#5); close eslint 10 (#4)
+- [ ] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid)
+- [ ] upgrade wrangler 3 -> 4 (OpenNext peer requirement)
+- [ ] turnstile widget render after async script load
+

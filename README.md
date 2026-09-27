@@ -7,7 +7,7 @@
 
 Opinionated, Cloudflare-first SaaS starter. Clone, rename, deploy.
 
-**Stack:** Next.js 16 (App Router) on Cloudflare Workers via `@opennextjs/cloudflare` · D1 + Drizzle · Better Auth (passkeys, MFA, OAuth, magic links) · Stripe hosted Checkout + Portal · Resend + CF Email Routing · shadcn/ui + Tailwind · GA4 + PostHog + CF Web Analytics (consent-gated) · Turnstile · Axiom via Logpush · Vitest + Playwright · GitHub Actions CI/CD.
+**Stack:** Next.js 16 (App Router) on Cloudflare Workers via `@opennextjs/cloudflare` · D1 + Drizzle · Better Auth (passkeys, MFA, OAuth, magic links) · Stripe hosted Checkout + Portal · Resend + CF Email Routing · shadcn/ui + Tailwind · GA4 + PostHog (consent-gated) · Turnstile · Axiom via Logpush · Vitest + Playwright · GitHub Actions CI + opt-in Cloudflare deploy.
 
 **Rendering:** Marketing + blog → SSG/ISR (edge-cached, best SEO). Auth + dashboard → SSR. API routes → Workers.
 
@@ -16,8 +16,8 @@ Opinionated, Cloudflare-first SaaS starter. Clone, rename, deploy.
 ## Why this template
 
 - **One platform.** Every runtime dependency (compute, DB, files, cache, queues, email routing) lives on Cloudflare. One bill, one dashboard, one set of credentials.
-- **SEO-first.** Static marketing + blog, dynamic sitemap, JSON-LD, IndexNow, `llms.txt`, preview auto-`noindex`, Lighthouse CI on every PR.
-- **Secure by default.** Route-scoped CSP, strict security headers, D1-backed Stripe webhook idempotency, Better Auth with passkeys, Turnstile on auth, CF Rate Limiting, account delete + data export.
+- **SEO-first.** Static marketing + blog, dynamic sitemap, JSON-LD, IndexNow, `llms.txt`, preview auto-`noindex`, Lighthouse report on every PR (non-blocking).
+- **Secure by default.** Route-scoped CSP, strict security headers, D1-backed Stripe webhook idempotency, Better Auth with passkeys, Turnstile widget and D1 rate-limit helpers, account delete + data export (see [Known gaps](#known-gaps)).
 - **Boring, swappable stack.** Repository layer (`db/repo/*`) isolates D1 so you can swap to Postgres/Turso later without touching domain code.
 - **No monorepo tax.** Flat Next.js app. Promote to a workspace later only if you genuinely need to.
 
@@ -44,7 +44,7 @@ The app boots with degraded features until you fill in credentials (auth needs t
 
 ### 1. Prereqs
 - Node 22 (see `.nvmrc`) · pnpm 9 · a Cloudflare account · `wrangler login`
-- Domain added to Cloudflare (can be a subdomain) — only required for deploy, not local dev
+- Domain added to Cloudflare (can be a subdomain); only required for deploy, not local dev
 
 ### 2. Install
 
@@ -103,7 +103,7 @@ wrangler secret put STRIPE_SECRET_KEY --env preview
 # ...etc
 ```
 
-Public (`NEXT_PUBLIC_*`) vars go in `[env.*.vars]` blocks in `wrangler.toml`, not `wrangler secret`.
+Public (`NEXT_PUBLIC_*`) vars are not secrets, so never `wrangler secret` them. `next build` inlines them, so they must be set where you build (`.env.local`, your shell, or the GitHub environment used by `deploy.yml`); the `[env.*.vars]` blocks in `wrangler.toml` only cover runtime reads.
 
 ### 6. Database
 
@@ -118,8 +118,9 @@ pnpm db:migrate:prod     # apply to production D1
 
 ```bash
 pnpm dev         # http://localhost:3000
-pnpm build       # opennext build
-pnpm preview     # run the built worker locally
+pnpm build       # next build
+pnpm build:worker # next build + OpenNext worker bundle (.open-next/)
+pnpm preview     # run the built worker locally (after build:worker)
 pnpm typecheck
 pnpm lint
 pnpm test        # vitest
@@ -130,10 +131,10 @@ pnpm test:e2e    # playwright
 
 ```bash
 pnpm deploy:preview   # wrangler deploy --env preview
-pnpm deploy           # wrangler deploy --env production
+pnpm run deploy       # wrangler deploy --env production (`pnpm deploy` is a pnpm builtin, so use `run`)
 ```
 
-GitHub Actions does this automatically: preview on every PR, production on merge to `main`. Add repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
+GitHub Actions can do this for you: `.github/workflows/deploy.yml` deploys a preview on every PR and production on merge to `main` once you add repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. Create GitHub environments `preview` and `production`, each with at least the variable `NEXT_PUBLIC_APP_URL` plus any other `NEXT_PUBLIC_*` values your build needs; the workflow exports them before building and sets `NEXT_PUBLIC_IS_PREVIEW` itself. Without the secrets the deploy job is skipped and the workflow passes. Secrets are not passed to PRs from forks or Dependabot, so those PRs skip it too.
 
 ### 9. Post-deploy checklist
 
@@ -161,7 +162,7 @@ Full list in `.env.example`. Categorized in `docs/setup.md`. The minimum to boot
 
 ```
 app/
-  (marketing)/     # SSG/ISR — landing, pricing, blog, legal
+  (marketing)/     # SSG/ISR: landing, pricing, blog, legal
   (auth)/          # sign-in, sign-up, reset
   (app)/           # SSR, authed dashboard
   api/             # auth, stripe, indexnow, account, health
@@ -170,8 +171,8 @@ components/        # UI + consent + analytics + JSON-LD
 content/blog/      # MDX posts
 db/
   schema/          # Drizzle schema (auth, billing, app)
-  repo/            # repository layer — D1 impl today, swappable
-  migrations/
+  repo/            # repository layer: D1 impl today, swappable
+  migrations/      # created by `pnpm db:generate` (not committed in the template)
 emails/            # react-email templates
 lib/               # auth, db, stripe, resend, logger, csp, rate-limit, env
 tests/             # unit (vitest) + e2e (playwright)
@@ -185,12 +186,23 @@ docs/              # index, c4model, setup, runbooks/, adr/
 - **Auth:** email+password, Google OAuth, magic links, passkeys, 2FA (Better Auth)
 - **Billing:** Stripe hosted Checkout, Customer Portal, webhook with D1 idempotency, Stripe Tax
 - **Email:** Resend outbound + react-email templates (welcome, verify, reset, magic link, deletion)
-- **Bot / abuse:** Turnstile on auth, D1 fixed-window rate limiter
+- **Bot / abuse:** Turnstile widget on sign-in/sign-up, D1 fixed-window rate limiter helper (both still to be wired into routes, see [Known gaps](#known-gaps))
 - **Security:** route-scoped CSP (static for marketing = SSG-safe, nonce for app), HSTS, X-Frame-Options DENY, no-sniff, strict Referrer-Policy, Permissions-Policy
-- **SEO:** dynamic sitemap, robots (preview `noindex`), RSS, JSON-LD (Organization / WebSite+SearchAction / BreadcrumbList / Article / FAQPage / SoftwareApplication), IndexNow endpoint, `llms.txt`, per-route canonical, consent-gated GA4 + PostHog, web-vitals → PostHog, Lighthouse CI on PRs
-- **Privacy:** consent banner gates analytics, account delete w/ 30-day grace via Queue, account data export to R2
-- **Ops:** structured JSON logging, Tail Worker to Axiom via Logpush, CI (lint/typecheck/test/Lighthouse), deploy (preview per PR, prod on main), Dependabot + Renovate
+- **SEO:** dynamic sitemap, robots (preview `noindex`), RSS, JSON-LD (Organization / WebSite+SearchAction / BreadcrumbList / Article / FAQPage / SoftwareApplication), IndexNow endpoint, `llms.txt`, canonical URLs on blog posts and legal pages, consent-gated GA4 + PostHog, web-vitals → PostHog, Lighthouse report on PRs
+- **Privacy:** consent banner gates analytics, account delete w/ 30-day grace (enqueued; consumer not included yet), account data export to R2
+- **Ops:** structured JSON logging (ship to Axiom with Cloudflare Logpush, see `docs/setup.md`), CI (lint, typecheck, unit tests, migration generation, production build, non-blocking Lighthouse on PRs), opt-in deploy (preview per PR, prod on main), Dependabot
 - **Docs:** C4 diagram, setup, runbooks (D1 escape hatch, backup/restore, Stripe isolation, passkey domain binding), ADR
+
+## Known gaps
+
+`.github/workflows/ci.yml` installs, lints, typechecks, tests and builds the template on every PR and push to `main`. As of 27 Sep 2026 these parts are scaffolded rather than wired end to end (tracked in `todo.md`):
+
+- `db/schema/auth.ts` lacks fields the Better Auth two-factor and passkey plugins expect (`user.twoFactorEnabled`, a `twoFactor` table, `passkey.aaguid`, the `credentialID` field name). Sign-up fails against a real database until the schema is reconciled, for example with the Better Auth CLI.
+- Turnstile: the widget renders on sign-in/sign-up, but no route calls `verifyTurnstile` in `lib/turnstile.ts`.
+- Rate limiting: `lib/rate-limit.ts` exists, but no route calls it.
+- Account deletion enqueues a purge job, but no queue consumer processes it.
+- wrangler is 3.x while `@opennextjs/cloudflare` declares a wrangler 4 peer; upgrade before deploying.
+- The root layout sets canonical `/`, so pages without their own `alternates.canonical` (pricing, blog index, auth pages) point search engines at the homepage.
 
 ## Intentionally not included
 
@@ -208,8 +220,8 @@ docs/              # index, c4model, setup, runbooks/, adr/
 
 Every dependency was picked to **reduce later regret, not to maximize current convenience**:
 
-- Stripe *hosted* Checkout over embedded payment UI → keeps PCI scope zero and CSP simple
-- D1 *with a repo boundary* → cheap today, swappable when you outgrow 10 GB
+- Stripe *hosted* Checkout over embedded payment UI → card details are entered on Stripe's page, not yours, and CSP stays simple
+- D1 *with a repo boundary* → cheap today, swappable when you outgrow D1's size limits
 - Flat app *without* a monorepo → no scaffolding tax until you actually have multiple apps
 - Better Auth *without* custom CSRF → one layer, not two that fight each other
 - SSG for SEO pages *always* → crawlers see instant HTML, Google rewards you, cache misses never hit origin
@@ -218,7 +230,7 @@ Every dependency was picked to **reduce later regret, not to maximize current co
 
 ## License
 
-MIT — see `LICENSE`.
+MIT, see `LICENSE`.
 
 ## Contributing
 
