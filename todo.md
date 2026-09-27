@@ -40,7 +40,9 @@
 - [x] drop unused react-hook-form + @hookform/resolvers (supersedes Dependabot #5); eslint 10 (#4) closed
 - [x] actions/checkout 7 (#9), actions/setup-node 7 (#11, replaced #1) and pnpm/action-setup 6 (#2, no `version:` input) merged
 - [x] zod 4.6 (supersedes Dependabot #7 / #15): lib/env.ts on z.url(), z.email(), z.flattenError()
-- [ ] Dependabot: drizzle-kit 0.31 + drizzle-orm (#6), stripe 22 (#8 / #17)
+- [x] drizzle-kit 0.31.11 + drizzle-orm 0.45.3 (supersedes Dependabot #6 / #18); index definitions on the array form; generated SQL unchanged; Better Auth logs redact DrizzleQueryError params
+- [ ] `recordStripeEventAndApply` treats every insert failure as a duplicate (swallows D1 outages)
+- [ ] Dependabot: stripe 22 (#8 / #17)
 - [ ] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid)
 - [ ] upgrade wrangler 3 -> 4 (OpenNext peer requirement)
 - [ ] turnstile widget render after async script load

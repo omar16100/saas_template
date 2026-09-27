@@ -26,6 +26,7 @@
 ## Components
 - `lib/auth.ts`: Better Auth. `getAuth()` builds the instance per call because the D1 binding only exists inside a request (`getCloudflareContext`); nothing touches it at module load, so `next build` can evaluate route modules. Passkeys come from `@better-auth/passkey`.
 - `lib/stripe.ts` + `/api/stripe/*`: billing. `subscriptionCurrentPeriodEnd()` reads the period from the first subscription item (Stripe API 2025-03-31.basil and later).
+- `lib/logger.ts`: JSON log lines. `describeError()` drops bound query parameters from drizzle `DrizzleQueryError`s; Better Auth logs go through `logBetterAuthEvent()` for the same reason. `/api/auth/*` is served by `handleAuthRequest()` (lib/auth.ts), which catches errors Better Auth rethrows (`onAPIError.throw`) and logs them the same way.
 - `db/repo/*` — repository boundary (swap D1 → Postgres/Turso without touching domain code)
 - `lib/csp.ts` + `middleware.ts` — security headers
 - `components/*` — UI + analytics + consent

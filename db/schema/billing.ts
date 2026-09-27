@@ -20,10 +20,10 @@ export const subscription = sqliteTable("subscription", {
   cancelAtPeriodEnd: integer("cancel_at_period_end", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-}, (t) => ({
-  userIdx: index("sub_user_idx").on(t.userId),
-  statusIdx: index("sub_status_idx").on(t.status),
-}));
+}, (t) => [
+  index("sub_user_idx").on(t.userId),
+  index("sub_status_idx").on(t.status),
+]);
 
 export const entitlement = sqliteTable("entitlement", {
   id: text("id").primaryKey(),
@@ -31,6 +31,6 @@ export const entitlement = sqliteTable("entitlement", {
   feature: text("feature").notNull(),
   grantedAt: integer("granted_at", { mode: "timestamp" }).notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp" }),
-}, (t) => ({
-  userFeatureIdx: index("ent_user_feature_idx").on(t.userId, t.feature),
-}));
+}, (t) => [
+  index("ent_user_feature_idx").on(t.userId, t.feature),
+]);

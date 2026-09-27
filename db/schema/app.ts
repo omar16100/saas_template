@@ -13,9 +13,9 @@ export const deletionQueue = sqliteTable("deletion_queue", {
   userId: text("user_id").primaryKey().references(() => user.id, { onDelete: "cascade" }),
   requestedAt: integer("requested_at", { mode: "timestamp" }).notNull(),
   purgeAt: integer("purge_at", { mode: "timestamp" }).notNull(),
-}, (t) => ({
-  purgeIdx: index("del_purge_idx").on(t.purgeAt),
-}));
+}, (t) => [
+  index("del_purge_idx").on(t.purgeAt),
+]);
 
 // Audit log (keep small — use Analytics Engine for high-volume events).
 export const auditLog = sqliteTable("audit_log", {
@@ -25,7 +25,7 @@ export const auditLog = sqliteTable("audit_log", {
   metadata: text("metadata"),
   ipAddress: text("ip_address"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-}, (t) => ({
-  userIdx: index("audit_user_idx").on(t.userId),
-  createdIdx: index("audit_created_idx").on(t.createdAt),
-}));
+}, (t) => [
+  index("audit_user_idx").on(t.userId),
+  index("audit_created_idx").on(t.createdAt),
+]);
