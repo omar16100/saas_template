@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-const schema = z.object({
+export const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
   NEXT_PUBLIC_APP_NAME: z.string().default("SaaS Template"),
-  NEXT_PUBLIC_IS_PREVIEW: z.coerce.boolean().default(false),
+  // Only the exact string "true" enables preview mode (same rule as middleware.ts); z.coerce.boolean() would turn "false" into true.
+  NEXT_PUBLIC_IS_PREVIEW: z.string().optional().transform((v) => v === "true"),
 
   BETTER_AUTH_SECRET: z.string().min(32).optional(),
   BETTER_AUTH_URL: z.string().url().optional(),
@@ -36,10 +37,10 @@ const schema = z.object({
   AXIOM_DATASET: z.string().optional(),
 });
 
-export type Env = z.infer<typeof schema>;
+export type Env = z.infer<typeof envSchema>;
 
 function parseEnv(): Env {
-  const parsed = schema.safeParse({
+  const parsed = envSchema.safeParse({
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     NEXT_PUBLIC_IS_PREVIEW: process.env.NEXT_PUBLIC_IS_PREVIEW,

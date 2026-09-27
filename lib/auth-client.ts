@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react";
-import { passkeyClient, twoFactorClient, magicLinkClient } from "better-auth/client/plugins";
+import { passkeyClient } from "@better-auth/passkey/client";
+import { twoFactorClient, magicLinkClient } from "better-auth/client/plugins";
 
 export const authClient = createAuthClient({
   baseURL: process.env.NEXT_PUBLIC_APP_URL,

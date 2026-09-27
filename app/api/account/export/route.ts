@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { repos } from "@/db/repo/d1";
 import { cfEnv } from "@/lib/cf";
 import { log } from "@/lib/logger";
 
 export async function POST(req: Request) {
-  const session = await auth.api.getSession({ headers: req.headers });
+  const session = await getAuth().api.getSession({ headers: req.headers });
   if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   const user = await repos.users.findById(session.user.id);

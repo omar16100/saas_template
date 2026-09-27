@@ -6,6 +6,8 @@ export default defineConfig({
     environment: "happy-dom",
     include: ["tests/unit/**/*.test.ts", "tests/unit/**/*.test.tsx"],
     globals: true,
+    // lib/env.ts validates process.env at import time; give unit tests the one required var.
+    env: { NEXT_PUBLIC_APP_URL: "http://localhost:3000" },
   },
   resolve: {
     alias: { "@": path.resolve(__dirname, ".") },

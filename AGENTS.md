@@ -51,7 +51,7 @@ pnpm lint
 
 ### CI enforcement
 
-`.github/workflows/ci.yml` blocks merge on `lint`, `typecheck`, `test`, and Lighthouse. Never bypass with `--no-verify` or `[skip ci]`.
+`.github/workflows/ci.yml` runs `lint`, `typecheck`, `test`, migration generation and the production build (`pnpm build:worker`) on every PR and push to `main`. Lighthouse runs on PRs as a non-blocking report. Do not merge on red CI. Never bypass with `--no-verify` or `[skip ci]`.
 
 ---
 
@@ -93,7 +93,7 @@ Every PR must pass this review. Paste the checklist into the PR body and tick ea
 - [ ] `X-Robots-Tag: noindex` on any preview-only or internal route
 
 ### A06: Vulnerable & Outdated Components
-- [ ] Dependabot + Renovate already configured — review bumps, don't auto-ignore
+- [ ] Dependabot already configured: review bumps, don't auto-ignore
 - [ ] `pnpm audit` clean before merging a release
 - [ ] Pin major versions in `package.json`; let minor/patch float
 - [ ] Remove unused deps (`pnpm why <pkg>`) — each dep is attack surface

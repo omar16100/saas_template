@@ -41,7 +41,7 @@ wrangler secret put TURNSTILE_SECRET_KEY --env production
 
 ## 5. DB migrations
 ```bash
-pnpm db:generate
+pnpm db:generate          # writes SQL to db/migrations (config: db/drizzle.config.ts)
 pnpm db:migrate:local     # local
 pnpm db:migrate:preview   # preview
 pnpm db:migrate:prod      # production
@@ -50,13 +50,17 @@ pnpm db:migrate:prod      # production
 ## 6. Dev
 ```bash
 pnpm dev
+pnpm cf-typegen   # regenerate cloudflare-env.d.ts after editing wrangler.toml (pnpm typecheck does this too)
+pnpm build:worker # production build: next build + OpenNext worker bundle
 ```
 
 ## 7. Deploy
 ```bash
 pnpm deploy:preview
-pnpm deploy
+pnpm run deploy   # `pnpm deploy` is a pnpm builtin, so use `run`
 ```
+
+Or let `.github/workflows/deploy.yml` do it: add repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and create GitHub environments `preview` and `production` with at least the variable `NEXT_PUBLIC_APP_URL` (plus any other `NEXT_PUBLIC_*` the build needs; they are inlined at build time). Without the secrets the workflow skips the deploy.
 
 ## 8. Post-deploy
 - Add domain + DNS in CF

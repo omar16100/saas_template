@@ -1,19 +1,33 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 
 const KEY = "consent-v1";
+const CHANGE_EVENT = "consent-change";
+
+function readConsent(): boolean | null {
+  const v = localStorage.getItem(KEY);
+  return v === "granted" ? true : v === "denied" ? false : null;
+}
+
+function readServerConsent(): boolean | null {
+  return null;
+}
+
+function subscribeToConsent(onChange: () => void) {
+  window.addEventListener(CHANGE_EVENT, onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, onChange);
+    window.removeEventListener("storage", onChange);
+  };
+}
 
 export function useConsent() {
-  const [consent, setConsent] = useState<boolean | null>(null);
-  useEffect(() => {
-    const v = localStorage.getItem(KEY);
-    setConsent(v === "granted" ? true : v === "denied" ? false : null);
-  }, []);
+  const consent = useSyncExternalStore(subscribeToConsent, readConsent, readServerConsent);
   function set(v: boolean) {
     localStorage.setItem(KEY, v ? "granted" : "denied");
-    setConsent(v);
-    window.dispatchEvent(new Event("consent-change"));
+    window.dispatchEvent(new Event(CHANGE_EVENT));
   }
   return { consent, grant: () => set(true), deny: () => set(false) };
 }

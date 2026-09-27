@@ -6,6 +6,14 @@ export function stripe() {
   return new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2025-12-18.acacia" as never });
 }
 
+// Since API version 2025-03-31.basil, billing periods live on subscription items, not the subscription.
+// The first item is the one whose price we store (see the webhook route), so read its period too.
+export function subscriptionCurrentPeriodEnd(sub: Stripe.Subscription): Date {
+  const item = sub.items.data[0];
+  if (!item) throw new Error(`stripe subscription ${sub.id} has no items, cannot read current_period_end`);
+  return new Date(item.current_period_end * 1000);
+}
+
 export async function createCheckoutSession(opts: {
   userId: string;
   email: string;

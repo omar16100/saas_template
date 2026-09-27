@@ -11,6 +11,7 @@
 | Stripe preview isolation | [runbooks/stripe-preview-isolation.md](runbooks/stripe-preview-isolation.md) | Runbook |
 | Passkey preview domains | [runbooks/passkey-preview-domains.md](runbooks/passkey-preview-domains.md) | Runbook |
 | ADR-001 Cloudflare + flat repo | [adr/001-cloudflare-flat-repo.md](adr/001-cloudflare-flat-repo.md) | ADR |
+| CI repair + dependency updates plan (27 Sep 2026) | [27092026_ci_and_deps_plan.md](27092026_ci_and_deps_plan.md) | Plan |
 
 ## Conventions
 - Dated docs: `DDMMYYYY_topic.md`

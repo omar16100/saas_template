@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { Stripe } from "stripe";
-import { stripe } from "@/lib/stripe";
+import { stripe, subscriptionCurrentPeriodEnd } from "@/lib/stripe";
 import { env } from "@/lib/env";
 import { repos } from "@/db/repo/d1";
 import { log } from "@/lib/logger";
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
             stripeCustomerId: typeof sub.customer === "string" ? sub.customer : sub.customer.id,
             stripePriceId: sub.items.data[0]?.price.id ?? "",
             status: sub.status,
-            currentPeriodEnd: new Date(sub.current_period_end * 1000),
+            currentPeriodEnd: subscriptionCurrentPeriodEnd(sub),
             cancelAtPeriodEnd: sub.cancel_at_period_end,
             createdAt: new Date(sub.created * 1000),
             updatedAt: new Date(),

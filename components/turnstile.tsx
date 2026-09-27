@@ -18,7 +18,12 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
-    if (!ref.current || !window.turnstile || !siteKey) return;
+    if (!siteKey) {
+      // Auto-verify in dev when not configured.
+      onVerify("dev-token");
+      return;
+    }
+    if (!ref.current || !window.turnstile) return;
     widgetId.current = window.turnstile.render(ref.current, {
       sitekey: siteKey,
       callback: onVerify,
@@ -28,11 +33,7 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
     };
   }, [siteKey, onVerify]);
 
-  if (!siteKey) {
-    // Auto-verify in dev when not configured.
-    useEffect(() => onVerify("dev-token"), [onVerify]);
-    return null;
-  }
+  if (!siteKey) return null;
 
   return (
     <>
