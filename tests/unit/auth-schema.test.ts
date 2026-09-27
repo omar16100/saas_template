@@ -15,6 +15,10 @@ const DATA_TYPE_BY_FIELD_TYPE: Record<string, string> = {
   number: "number",
 };
 
+// passkey.createdAt: NOT NULL predates the plugin marking it optional and dropping it needs a table rebuild.
+// The plugin writes a Date on registration and never null; the column's Drizzle default covers omission.
+const NOT_NULL_OPTIONAL_FIELDS = new Set(["passkey.createdAt"]);
+
 // Better Auth validates the Drizzle schema against every enabled plugin on each auth request and
 // fails the request on any mismatch, so a missing plugin field breaks sign-in, not just that plugin.
 async function authContext() {
@@ -63,10 +67,11 @@ function schemaProblems(options: Parameters<typeof getAuthTables>[0]) {
       }
       const expectedType = DATA_TYPE_BY_FIELD_TYPE[String(field.type)];
       if (column.dataType !== expectedType) problems.push(`${where} is ${column.dataType}, expected ${expectedType ?? String(field.type)}`);
-      // An optional field without a Better Auth default can be left out of an insert (two_factor.locked_until
-      // on enrolment), so its column must accept that: nullable or with a default.
-      if (field.required === false && field.defaultValue === undefined && column.notNull && !column.hasDefault) {
-        problems.push(`${where} is optional in Better Auth but NOT NULL without a default`);
+      // Better Auth may leave an optional field out of an insert or write it as null (the two-factor
+      // plugin resets locked_until to null), so a Drizzle default alone is not enough: the column must be nullable.
+      if (!field.required && field.defaultValue === undefined && column.notNull) {
+        const isAllowed = NOT_NULL_OPTIONAL_FIELDS.has(where) && column.hasDefault;
+        if (!isAllowed) problems.push(`${where} is optional in Better Auth but NOT NULL`);
       }
       if (field.unique && !isUniqueColumn(table, column)) problems.push(`${where} must be unique`);
       if (field.index && !isIndexed(table, column)) problems.push(`${where} must be indexed`);
