@@ -37,7 +37,8 @@
 - [x] `NEXT_PUBLIC_IS_PREVIEW="false"` no longer parses as true (+ unit test)
 - [ ] canonical: root layout sets `/` for every page without an override (pricing, blog index, auth pages)
 - [x] renovate.json removed (Dependabot only); eslint majors ignored
-- [ ] Dependabot: actions bumps (#1, #2, #9), zod 4 (#7), drizzle-kit 0.31 + drizzle-orm (#6), stripe 22 (#8); drop unused react-hook-form + @hookform/resolvers (#5); close eslint 10 (#4)
+- [x] drop unused react-hook-form + @hookform/resolvers (supersedes Dependabot #5); eslint 10 (#4) closed
+- [ ] Dependabot: actions bumps (#1, #2, #9), zod 4 (#7), drizzle-kit 0.31 + drizzle-orm (#6), stripe 22 (#8)
 - [ ] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid)
 - [ ] upgrade wrangler 3 -> 4 (OpenNext peer requirement)
 - [ ] turnstile widget render after async script load
