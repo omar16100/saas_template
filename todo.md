@@ -42,7 +42,11 @@
 - [x] zod 4.6 (supersedes Dependabot #7 / #15): lib/env.ts on z.url(), z.email(), z.flattenError()
 - [x] drizzle-kit 0.31.11 + drizzle-orm 0.45.3 (supersedes Dependabot #6 / #18); index definitions on the array form; generated SQL unchanged; Better Auth logs redact DrizzleQueryError params
 - [ ] `recordStripeEventAndApply` treats every insert failure as a duplicate (swallows D1 outages)
-- [ ] Dependabot: stripe 22 (#8 / #17)
+- [x] stripe 22.6 (supersedes Dependabot #8 / #17): apiVersion pinned to the SDK's 2026-08-26.dahlia without a cast; checkout sets subscription_data.metadata.userId and billing_mode classic (+ tests)
+- [ ] billing: pricing CTA reads NEXT_PUBLIC_STRIPE_PRICE_* but .env.example defines STRIPE_PRICE_*
+- [ ] billing: dashboard "Manage billing" form gets JSON `{ url }` back instead of a redirect
+- [ ] billing: webhook records the event before apply(), so a failed apply is never retried; upserts do not guard against out-of-order events
+- [ ] Dependabot PRs opened during this sweep and not triaged: web-vitals 6 (#12, CI green), vitest 4 (#13, CI red: needs vite 6+)
 - [ ] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid)
 - [ ] upgrade wrangler 3 -> 4 (OpenNext peer requirement)
 - [ ] turnstile widget render after async script load

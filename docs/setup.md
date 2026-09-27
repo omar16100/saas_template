@@ -66,7 +66,7 @@ Or let `.github/workflows/deploy.yml` do it: add repo secrets `CLOUDFLARE_API_TO
 - Add domain + DNS in CF
 - Enable CF Email Routing for inbound forward
 - Verify Resend domain (DKIM/SPF/DMARC)
-- Point Stripe webhook at `/api/stripe/webhook`
+- Point Stripe webhook at `/api/stripe/webhook` and set the endpoint's API version to the one pinned in `lib/stripe.ts` (currently `2026-08-26.dahlia`, the version stripe-node 22.6 is typed for). Webhook payloads follow the endpoint's version, not the SDK's.
 - Add GSC + Bing properties, paste verification codes
 - Generate `INDEXNOW_KEY` and serve at `/{key}.txt`
 - Configure Logpush → Axiom

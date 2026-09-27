@@ -3,7 +3,7 @@ import { env } from "./env";
 
 export function stripe() {
   if (!env.STRIPE_SECRET_KEY) throw new Error("STRIPE_SECRET_KEY missing");
-  return new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2025-12-18.acacia" as never });
+  return new Stripe(env.STRIPE_SECRET_KEY, { apiVersion: "2026-08-26.dahlia" });
 }
 
 // Since API version 2025-03-31.basil, billing periods live on subscription items, not the subscription.
@@ -35,6 +35,13 @@ export async function createCheckoutSession(opts: {
     automatic_tax: { enabled: true },
     billing_address_collection: "auto",
     metadata: { userId: opts.userId },
+    subscription_data: {
+      // Session metadata does not reach the Subscription; the webhook reads userId from the Subscription.
+      metadata: { userId: opts.userId },
+      // API versions from 2025-09-30.clover default to flexible billing, where portal cancellations set
+      // `cancel_at` instead of `cancel_at_period_end`, which is the field we store.
+      billing_mode: { type: "classic" },
+    },
   });
 }
 
