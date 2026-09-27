@@ -201,7 +201,6 @@ docs/              # index, c4model, setup, runbooks/, adr/
 - Turnstile: the widget renders on sign-in/sign-up, but no route calls `verifyTurnstile` in `lib/turnstile.ts`.
 - Rate limiting: `lib/rate-limit.ts` exists, but no route calls it.
 - Account deletion enqueues a purge job, but no queue consumer processes it.
-- wrangler is 3.x while `@opennextjs/cloudflare` declares a wrangler 4 peer; upgrade before deploying.
 - The root layout sets canonical `/`, so pages without their own `alternates.canonical` (pricing, blog index, auth pages) point search engines at the homepage.
 - Billing: the pricing button reads `NEXT_PUBLIC_STRIPE_PRICE_*` while `.env.example` defines `STRIPE_PRICE_*`; the dashboard "Manage billing" form receives the portal URL as JSON instead of being redirected; the webhook records an event before applying it, so a failed apply is not retried.
 

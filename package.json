@@ -19,7 +19,7 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate --config db/drizzle.config.ts",
     "db:migrate:local": "wrangler d1 migrations apply saas_db --local",
-    "db:migrate:preview": "wrangler d1 migrations apply saas_db --env preview --remote",
+    "db:migrate:preview": "wrangler d1 migrations apply saas_db_preview --env preview --remote",
     "db:migrate:prod": "wrangler d1 migrations apply saas_db --env production --remote",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },
@@ -28,7 +28,7 @@
     "@next/mdx": "^16.0.0",
     "@opennextjs/cloudflare": "^1.8.0",
     "@radix-ui/react-slot": "^1.1.1",
-    "@react-email/components": "^0.0.32",
+    "@react-email/components": "^0.0.36",
     "better-auth": "^1.7.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -47,7 +47,6 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250101.0",
     "@playwright/test": "^1.50.0",
     "@testing-library/react": "^16.1.0",
     "@types/node": "^22.10.0",
@@ -57,11 +56,20 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9.17.0",
     "eslint-config-next": "^16.0.0",
-    "happy-dom": "^16.0.0",
+    "happy-dom": "^20.14.5",
     "postcss": "^8.5.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.0",
-    "vitest": "^2.1.8",
-    "wrangler": "^3.99.0"
+    "vite": "^8.3.1",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.141.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@esbuild-kit/core-utils>esbuild": "^0.25.4"
+    },
+    "//overrides": {
+      "@esbuild-kit/core-utils>esbuild": "GHSA-67mh-4wv8-2f99 (esbuild <= 0.24.2: any website can send requests to the esbuild dev server and read the responses). drizzle-kit 0.31.11 still lists @esbuild-kit/esm-loader, which pins esbuild ~0.18.20, although its bundled CLI never loads it. Moves it onto the esbuild 0.25 line drizzle-kit already uses. Remove once drizzle-kit drops @esbuild-kit."
+    }
   }
 }

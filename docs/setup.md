@@ -50,7 +50,7 @@ pnpm db:migrate:prod      # production
 ## 6. Dev
 ```bash
 pnpm dev
-pnpm cf-typegen   # regenerate cloudflare-env.d.ts after editing wrangler.toml (pnpm typecheck does this too)
+pnpm cf-typegen   # regenerate cloudflare-env.d.ts (bindings + Workers runtime types) after editing wrangler.toml or the compatibility date/flags (pnpm typecheck does this too)
 pnpm build:worker # production build: next build + OpenNext worker bundle
 ```
 

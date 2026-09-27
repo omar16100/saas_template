@@ -6,7 +6,8 @@
   ```bash
   wrangler d1 export saas_db --env production --output backup-$(date +%F).sql --remote
   # upload to R2
-  wrangler r2 object put saas-backups/d1/$(date +%F).sql --file backup-$(date +%F).sql
+  # wrangler 4 defaults r2 object commands to local storage, so --remote is required
+  wrangler r2 object put saas-backups/d1/$(date +%F).sql --file backup-$(date +%F).sql --remote
   ```
 - Schedule via GitHub Actions cron.
 
