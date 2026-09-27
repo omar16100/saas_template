@@ -78,6 +78,8 @@ Upgrade path: on that `main`-schema D1, with a pre-existing user and subscriptio
 - [x] Guard test red on `main` (Better Auth's check listed exactly the four findings above), green after the fix. Mutations caught: a column type change, a dropped foreign key or unique, a dropped index, `session.token` not unique, `two_factor.locked_until` made `NOT NULL`.
 - [x] Codex review round 1: no blocker or major. Applied: nullability rule in the guard (it found `passkey.created_at`, fixed with a Drizzle-side default), migration warning next to the README and setup commands. Documented, not changed: the concurrent 2FA enable 500 (see Decisions).
 - [x] Codex review round 2: no blocker or major. Applied: a Drizzle default no longer satisfies the nullability rule (an explicit null write would still fail), so optional fields must be nullable, with `passkey.createdAt` as the listed exception.
+- [x] Codex review round 3: no findings (the `passkey.createdAt` exception checked against every passkey write path in 1.7.6).
+- [x] PR #30, CI green (lint, typecheck, 37 tests, migrations in sync, `build:worker`).
 - [x] `db/schema/auth.ts` fixed; `db/migrations/0000_initial.sql` committed; CI checks migrations are in sync (verified locally that a schema change without a migration fails the check).
 - [x] lint, typecheck, 37 unit tests (32 before, 5 new), `pnpm db:generate` (no changes), `pnpm build:worker` pass locally.
 - [x] End to end as above, fresh and upgraded D1.
