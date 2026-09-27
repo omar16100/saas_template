@@ -19,7 +19,7 @@
     "test:e2e": "playwright test",
     "db:generate": "drizzle-kit generate --config db/drizzle.config.ts",
     "db:migrate:local": "wrangler d1 migrations apply saas_db --local",
-    "db:migrate:preview": "wrangler d1 migrations apply saas_db --env preview --remote",
+    "db:migrate:preview": "wrangler d1 migrations apply saas_db_preview --env preview --remote",
     "db:migrate:prod": "wrangler d1 migrations apply saas_db --env production --remote",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },

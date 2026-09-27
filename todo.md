@@ -51,6 +51,7 @@
 - [x] upgrade wrangler 3 -> 4 (OpenNext peer requirement): wrangler 4.141.0; `@cloudflare/workers-types` dropped for the runtime types `wrangler types` now generates
 - [x] security alerts (32 open on 27 Sep 2026): vitest 4.1.11 + vite 8.3.1, happy-dom 20.14.5, wrangler 4 (clears undici, ws, sharp and esbuild 0.17 from wrangler 3 / miniflare 3), @react-email/components 0.0.36 (prismjs 1.30), `pnpm.overrides` `@esbuild-kit/core-utils>esbuild` ^0.25.4 (drizzle-kit 0.31.11 has no fix); email template render tests added
 - [ ] migrate off deprecated `@react-email/components` (components moved into `react-email` 6)
+- [x] `db:migrate:preview` targets `saas_db_preview` (was `saas_db`, not in the preview env); backup runbook R2 upload passes `--remote` (wrangler 4 defaults to local)
 - [ ] drop the `@esbuild-kit/core-utils>esbuild` override when drizzle-kit no longer depends on `@esbuild-kit/esm-loader`
 - [ ] turnstile widget render after async script load
 
