@@ -42,8 +42,10 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 
 ## Status
 - [x] Step 1 implemented locally, all CI commands pass on Node 22 + pnpm 9.15.0.
-- [ ] Step 1 merged, `main` CI green.
-- [ ] Steps 2 to 7.
+- [x] Step 1 merged as #10; `main` ci and deploy runs green (deploy job skipped, no secrets).
+- [x] Step 7: #4 closed by Dependabot once the eslint major ignore landed; reason commented on the PR.
+- [x] Step 3: react-hook-form + @hookform/resolvers removed (no imports anywhere); #5 closed as superseded.
+- [ ] Steps 2, 4, 5, 6.
 
 ## Deviations
 - The Stripe `current_period_end` fix moved into PR 1 because stripe 18 (already installed) fails typecheck without it. The stripe 22 PR only changes the version and `apiVersion`.

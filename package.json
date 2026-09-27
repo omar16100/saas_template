@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@better-auth/passkey": "^1.7.6",
-    "@hookform/resolvers": "^3.10.0",
     "@next/mdx": "^16.0.0",
     "@opennextjs/cloudflare": "^1.8.0",
     "@radix-ui/react-slot": "^1.1.1",
@@ -41,7 +40,6 @@
     "posthog-js": "^1.205.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.54.0",
     "resend": "^4.0.0",
     "stripe": "^18.0.0",
     "tailwind-merge": "^2.6.0",
