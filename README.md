@@ -114,6 +114,8 @@ pnpm db:migrate:prod     # apply to production D1
 pnpm db:generate         # after editing db/schema: write the next migration, then commit it
 ```
 
+If your D1 already has tables from migrations you generated before `0000_initial.sql` was committed, keep your own `db/migrations` history and run `pnpm db:generate` instead of applying it (see `docs/27092026_auth_schema_plan.md`).
+
 `db/schema/auth.ts` must hold every table and field the enabled Better Auth plugins write: Better Auth checks it on every auth request and fails the request on a mismatch. `tests/unit/auth-schema.test.ts` runs the same check, so adding a plugin without its tables fails `pnpm test`.
 
 ### 7. Run

@@ -46,7 +46,7 @@ pnpm db:migrate:preview   # preview
 pnpm db:migrate:prod      # production
 pnpm db:generate          # after a db/schema change: writes the next SQL file to db/migrations (config: db/drizzle.config.ts); commit it
 ```
-The initial migration (`db/migrations/0000_initial.sql`) is committed. CI runs `pnpm db:generate` and fails if it writes anything, so a schema change always ships with its migration. If you enable another Better Auth plugin, add its tables to `db/schema/auth.ts` (compare with `pnpm dlx auth@<better-auth version> generate`), then run `pnpm db:generate`.
+The initial migration (`db/migrations/0000_initial.sql`) is committed. If your D1 already has tables from migrations you generated from an earlier schema, do not apply it on top: keep your own `db/migrations` history and run `pnpm db:generate` (see docs/27092026_auth_schema_plan.md). CI runs `pnpm db:generate` and fails if it writes anything, so a schema change always ships with its migration. If you enable another Better Auth plugin, add its tables to `db/schema/auth.ts` (compare with `pnpm dlx auth@<better-auth version> generate`), then run `pnpm db:generate`.
 
 ## 6. Dev
 ```bash

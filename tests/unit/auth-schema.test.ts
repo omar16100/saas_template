@@ -40,7 +40,8 @@ function isUniqueColumn(table: SQLiteTable, column: SQLiteColumn) {
 }
 
 // Everything Better Auth's own check covers (tables, columns, required columns it never writes)
-// plus column types, unique and index flags, and foreign keys, which it does not check.
+// plus what it does not check: column types, nullability of optional fields, unique and index flags,
+// and foreign keys.
 function schemaProblems(options: Parameters<typeof getAuthTables>[0]) {
   const problems: string[] = [];
   for (const [key, authTable] of Object.entries(getAuthTables(options))) {
@@ -62,6 +63,11 @@ function schemaProblems(options: Parameters<typeof getAuthTables>[0]) {
       }
       const expectedType = DATA_TYPE_BY_FIELD_TYPE[String(field.type)];
       if (column.dataType !== expectedType) problems.push(`${where} is ${column.dataType}, expected ${expectedType ?? String(field.type)}`);
+      // An optional field without a Better Auth default can be left out of an insert (two_factor.locked_until
+      // on enrolment), so its column must accept that: nullable or with a default.
+      if (field.required === false && field.defaultValue === undefined && column.notNull && !column.hasDefault) {
+        problems.push(`${where} is optional in Better Auth but NOT NULL without a default`);
+      }
       if (field.unique && !isUniqueColumn(table, column)) problems.push(`${where} must be unique`);
       if (field.index && !isIndexed(table, column)) problems.push(`${where} must be indexed`);
       if (field.references) {

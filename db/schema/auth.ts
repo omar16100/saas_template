@@ -69,7 +69,9 @@ export const passkey = sqliteTable("passkey", {
   deviceType: text("device_type"),
   backedUp: integer("backed_up", { mode: "boolean" }).notNull().default(false),
   transports: text("transports"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  // Optional for the passkey plugin (it sets it on registration today); a Drizzle-side default keeps
+  // inserts valid without rebuilding the table to drop NOT NULL.
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   aaguid: text("aaguid"),
 }, (t) => [
   index("passkey_user_idx").on(t.userId),
