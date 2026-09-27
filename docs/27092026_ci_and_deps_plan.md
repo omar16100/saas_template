@@ -32,7 +32,7 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 - `pnpm build` is now `next build`; `pnpm build:worker` runs the OpenNext build (the recommended OpenNext script layout). CI makes `build:worker` a mandatory step; Lighthouse stays optional and now runs against `next start`.
 - `pnpm typecheck` and `pnpm build` run `wrangler types` first so a fresh clone (and the deploy job) typechecks and builds.
 - `getAuth()` builds Better Auth per call instead of caching it, to keep module state out of the Worker (AGENTS.md 12-Factor VI).
-- `db/migrations/` is not committed: the auth schema does not yet match better-auth 1.7 plugins (see follow-ups), so an initial migration would bake that in. CI still runs `drizzle-kit generate` as a schema check.
+- `db/migrations/` is not committed: the auth schema does not yet match better-auth 1.7 plugins (see follow-ups), so an initial migration would bake that in. CI still runs `drizzle-kit generate` as a schema check. (Superseded by docs/27092026_auth_schema_plan.md: the schema is fixed, `0000_initial.sql` is committed and CI checks it is in sync.)
 - `deploy.yml` gates on a `config` job that checks the Cloudflare secrets; without them the deploy job is skipped and the workflow passes. When enabled, the deploy job uses GitHub environment `preview` (PRs) or `production` (main), exports that environment's non-empty `NEXT_PUBLIC_*` variables before building (Next.js inlines them), sets `NEXT_PUBLIC_IS_PREVIEW`, and fails loudly if `NEXT_PUBLIC_APP_URL` is missing.
 - `pnpm run deploy` now passes `--env production` to match the README (it deployed the default localhost env before).
 - Lighthouse output (`.lighthouseci`, hidden dir so `include-hidden-files: true`) is uploaded as a non-blocking PR artifact.
@@ -71,11 +71,11 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 - PR 1 also contains the better-auth passkey import move, the lazy auth factory and the ESLint rule fixes, because CI cannot be green without them.
 
 ## Follow-ups for the owner (not done here)
-- `db/schema/auth.ts` lacks what the better-auth 1.7 plugins expect: the `twoFactor` table and `user.twoFactorEnabled` (twoFactor plugin) and `passkey.aaguid` (passkey plugin). Generate the expected schema with the better-auth CLI and reconcile before first deploy.
+- ~~`db/schema/auth.ts` lacks what the better-auth 1.7 plugins expect: the `twoFactor` table and `user.twoFactorEnabled` (twoFactor plugin) and `passkey.aaguid` (passkey plugin). Generate the expected schema with the better-auth CLI and reconcile before first deploy.~~ Done, see docs/27092026_auth_schema_plan.md.
 - ~~wrangler is on 3.x~~ Done in step 8 (wrangler 4.141.0). A real deploy with wrangler 4 has not been run (no Cloudflare secrets in the repo).
 - `components/turnstile.tsx` renders the widget only if `window.turnstile` already exists when the effect runs; with the async script this can miss. Needs an `onLoad` hook. No route calls `verifyTurnstile`.
 - `lib/rate-limit.ts` has no callers; the `audit_log` table is never written; no queue consumer handles `user.purge`.
-- `passkey.credentialId` in the schema vs the plugin's `credentialID` field name.
+- ~~`passkey.credentialId` in the schema vs the plugin's `credentialID` field name.~~ Done, see docs/27092026_auth_schema_plan.md.
 - Root layout canonical `/` is inherited by pricing, blog index and auth pages.
 - Billing (pre-existing, found in the stripe review): pricing CTA env var names do not match `.env.example`; the Manage billing form receives JSON instead of a redirect; the webhook records the event before applying it and treats any insert error as a duplicate; subscription upserts ignore event ordering. Existing subscriptions created without `subscription_data.metadata.userId` or in flexible mode would need reconciliation.
 - ~~Dependabot PRs opened during the sweep~~ Done in step 8: web-vitals 6 (#12) merged, vitest 4 (#13) superseded by #23.

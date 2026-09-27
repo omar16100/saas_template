@@ -108,11 +108,13 @@ Public (`NEXT_PUBLIC_*`) vars are not secrets, so never `wrangler secret` them. 
 ### 6. Database
 
 ```bash
-pnpm db:generate         # generate migration SQL from schema
-pnpm db:migrate:local    # apply locally
+pnpm db:migrate:local    # apply db/migrations locally
 pnpm db:migrate:preview  # apply to preview D1
 pnpm db:migrate:prod     # apply to production D1
+pnpm db:generate         # after editing db/schema: write the next migration, then commit it
 ```
+
+`db/schema/auth.ts` must hold every table and field the enabled Better Auth plugins write: Better Auth checks it on every auth request and fails the request on a mismatch. `tests/unit/auth-schema.test.ts` runs the same check, so adding a plugin without its tables fails `pnpm test`.
 
 ### 7. Run
 
@@ -172,7 +174,7 @@ content/blog/      # MDX posts
 db/
   schema/          # Drizzle schema (auth, billing, app)
   repo/            # repository layer: D1 impl today, swappable
-  migrations/      # created by `pnpm db:generate` (not committed in the template)
+  migrations/      # SQL from `pnpm db:generate`, committed; CI fails if it is out of date
 emails/            # react-email templates
 lib/               # auth, db, stripe, resend, logger, csp, rate-limit, env
 tests/             # unit (vitest) + e2e (playwright)
@@ -197,7 +199,6 @@ docs/              # index, c4model, setup, runbooks/, adr/
 
 `.github/workflows/ci.yml` installs, lints, typechecks, tests and builds the template on every PR and push to `main`. As of 27 Sep 2026 these parts are scaffolded rather than wired end to end (tracked in `todo.md`):
 
-- `db/schema/auth.ts` lacks fields the Better Auth two-factor and passkey plugins expect (`user.twoFactorEnabled`, a `twoFactor` table, `passkey.aaguid`, the `credentialID` field name). Sign-up fails against a real database until the schema is reconciled, for example with the Better Auth CLI.
 - Turnstile: the widget renders on sign-in/sign-up, but no route calls `verifyTurnstile` in `lib/turnstile.ts`.
 - Rate limiting: `lib/rate-limit.ts` exists, but no route calls it.
 - Account deletion enqueues a purge job, but no queue consumer processes it.

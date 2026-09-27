@@ -41,11 +41,12 @@ wrangler secret put TURNSTILE_SECRET_KEY --env production
 
 ## 5. DB migrations
 ```bash
-pnpm db:generate          # writes SQL to db/migrations (config: db/drizzle.config.ts)
 pnpm db:migrate:local     # local
 pnpm db:migrate:preview   # preview
 pnpm db:migrate:prod      # production
+pnpm db:generate          # after a db/schema change: writes the next SQL file to db/migrations (config: db/drizzle.config.ts); commit it
 ```
+The initial migration (`db/migrations/0000_initial.sql`) is committed. CI runs `pnpm db:generate` and fails if it writes anything, so a schema change always ships with its migration. If you enable another Better Auth plugin, add its tables to `db/schema/auth.ts` (compare with `pnpm dlx auth@<better-auth version> generate`), then run `pnpm db:generate`.
 
 ## 6. Dev
 ```bash

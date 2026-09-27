@@ -27,8 +27,14 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
-      - name: Generate migrations from the Drizzle schema
-        run: pnpm db:generate
+      - name: Committed migrations match the Drizzle schema
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain -- db/migrations)" ]; then
+            git status --porcelain -- db/migrations
+            echo "::error::db/schema changed without a committed migration. Run pnpm db:generate and commit db/migrations."
+            exit 1
+          fi
       - name: Build (Next.js + OpenNext worker bundle)
         run: pnpm build:worker
       - name: Lighthouse (report only, does not block)

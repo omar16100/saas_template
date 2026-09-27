@@ -47,7 +47,7 @@
 - [ ] billing: dashboard "Manage billing" form gets JSON `{ url }` back instead of a redirect
 - [ ] billing: webhook records the event before apply(), so a failed apply is never retried; upserts do not guard against out-of-order events
 - [x] Dependabot PRs opened during this sweep: web-vitals 6 (#12) merged (only onCLS/onINP/onLCP/onFCP/onTTFB used); vitest 4 (#13) superseded by #23
-- [ ] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid)
+- [x] reconcile db/schema/auth.ts with better-auth 1.7 plugin tables (twoFactor, passkey.aaguid), see the auth schema section below
 - [x] upgrade wrangler 3 -> 4 (OpenNext peer requirement): wrangler 4.141.0; `@cloudflare/workers-types` dropped for the runtime types `wrangler types` now generates
 - [x] security alerts (32 open on 27 Sep 2026, 0 after #23): vitest 4.1.11 + vite 8.3.1, happy-dom 20.14.5, wrangler 4 (clears undici, ws, sharp and esbuild 0.17 from wrangler 3 / miniflare 3), @react-email/components 0.0.36 (prismjs 1.30), `pnpm.overrides` `@esbuild-kit/core-utils>esbuild` ^0.25.4 (drizzle-kit 0.31.11 has no fix); email template render tests added
 - [ ] migrate off deprecated `@react-email/components` (components moved into `react-email` 6)
@@ -55,3 +55,10 @@
 - [ ] drop the `@esbuild-kit/core-utils>esbuild` override when drizzle-kit no longer depends on `@esbuild-kit/esm-loader`
 - [ ] turnstile widget render after async script load
 
+## auth schema (27 Sep 2026, plan: docs/27092026_auth_schema_plan.md)
+- [x] guard test `tests/unit/auth-schema.test.ts`: real `getAuth()` config through Better Auth's own schema check, plus columns, types, unique, indexes and foreign keys from `getAuthTables()`
+- [x] `db/schema/auth.ts`: `twoFactor` table (`two_factor`, unique `user_id`), `user.twoFactorEnabled`, `passkey.aaguid`, `passkey.credentialID` property on the existing `credential_id` column, plugin indexes; additive only
+- [x] commit `db/migrations/0000_initial.sql`; CI fails when `pnpm db:generate` writes anything
+- [x] `.dev.vars` gitignored
+- [x] end to end on the built Worker + local D1: sign-up, sign-in, get-session, sign-out, passkey register + sign-in, 2FA enable + sign-in with a backup code (40/40), and on a D1 upgraded from the old schema
+- [ ] Better Auth rate limiter cannot see the client IP locally (shared bucket per path); check `cf-connecting-ip` via `advanced.ipAddress.ipAddressHeaders` with the rate-limit work

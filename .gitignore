@@ -7,6 +7,8 @@ node_modules
 .env
 .env.local
 .env.*.local
+.dev.vars
+.dev.vars.*
 coverage
 playwright-report
 test-results
