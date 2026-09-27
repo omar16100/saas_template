@@ -1,7 +1,7 @@
-# CI repair and dependency updates plan (27 Sep 2026)
+# CI repair, dependency updates and security alerts plan (27 Sep 2026)
 
 ## Goal
-Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 19 Apr 2026), then land or close the 8 open Dependabot PRs with real CI results behind them.
+Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 19 Apr 2026), then land or close the 8 open Dependabot PRs with real CI results behind them. Step 8 then clears the open Dependabot security alerts.
 
 ## Findings (why CI never passed)
 - `pnpm/action-setup` failed before install: `with: { version: 9 }` conflicts with `packageManager: pnpm@9.15.0`.
@@ -26,6 +26,7 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 5. drizzle-kit 0.31 (#6) together with a drizzle-orm version that better-auth's drizzle adapter accepts.
 6. stripe 22 (#8) in a dedicated PR: real `apiVersion` from the installed package, no `as never`.
 7. Close eslint 10 (#4): eslint-plugin-react 7.37.5 (via eslint-config-next 16.3.6) crashes under eslint 10 (`contextOrFilename.getFilename is not a function`).
+8. Security alerts (added later on 27 Sep 2026): clear the 32 open Dependabot alerts (4 critical, 11 high, 15 medium, 2 low) in one PR `deps/security-alerts`, parents first, `pnpm.overrides` only where no parent release fixes it. Triage the two Dependabot PRs opened during the sweep: web-vitals 6 (#12) and vitest 4 (#13).
 
 ## Decisions
 - `pnpm build` is now `next build`; `pnpm build:worker` runs the OpenNext build (the recommended OpenNext script layout). CI makes `build:worker` a mandatory step; Lighthouse stays optional and now runs against `next start`.
@@ -39,6 +40,15 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 - deploy.yml rejects multi-line `NEXT_PUBLIC_*` values (GITHUB_ENV injection).
 - README gains a Known gaps section instead of claiming Turnstile, rate limiting and the deletion consumer are wired.
 - eslint 10: close #4 and ignore eslint semver-major in Dependabot.
+- Security alerts (step 8), per alert source:
+  - vitest 2.1.9 (GHSA-5xrq-8626-4rwp critical, GHSA-82fw-gwwq-j7x9), @vitest/mocker, vite 5.4.21 (GHSA-fx2h-pf6j-xcff, GHSA-v6wh-96g9-6wx3, GHSA-4w7w-66w2-5vf9) and esbuild 0.21.5: vitest 4.1.11 with vite 8.3.1 as an explicit devDependency (vitest 4 needs vite 6+, which is why #13 alone failed). Test tooling only.
+  - happy-dom 16.8.1 (GHSA-37j7-fg3j-429f critical, GHSA-6q6h-j7hj-3r64, GHSA-w4gp-fjgq-3q4g): happy-dom 20.14.5. Test environment only.
+  - undici 5.29.0 (12 advisories), ws 8.18.0 (GHSA-96hv-2xvq-fx4p, GHSA-58qx-3vcg-4xpx), sharp 0.33.5 (GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c) and esbuild 0.17.19 all came from wrangler 3 / miniflare 3: wrangler 4.141.0 (miniflare with undici 7.29.0, ws 8.21.0, sharp 0.35.4). This also meets the `@opennextjs/cloudflare` peer (`^4.125.0`). Local dev and deploy tooling, not in the Worker bundle. `next` already had sharp 0.35.4.
+  - wrangler 4 `wrangler types` also generates the Workers runtime types into `cloudflare-env.d.ts` and asks to drop `@cloudflare/workers-types`; the package and the tsconfig `types` entry are removed so there is one source of runtime types. A probe file confirmed `D1Database` and `Queue` still resolve to real types (not `any`).
+  - prismjs 1.29.0 (GHSA-x7hr-w5r2-h6wg) via `@react-email/components` 0.0.32 -> `@react-email/code-block` 0.0.11: `@react-email/components` 0.0.36, the first release on prismjs 1.30.0. Runtime dependency, but the templates never import `CodeBlock` and the built Worker contains no Prism code. Rendered HTML of all five templates is unchanged apart from `margin:16px 0` becoming `margin-top`/`margin-bottom`; `tests/unit/emails.test.tsx` now renders each template. 1.0.x was tried and wraps the body in an extra table, so it is left for the migration below.
+  - esbuild 0.18.20 (GHSA-67mh-4wv8-2f99) via drizzle-kit 0.31.11 (latest) -> `@esbuild-kit/esm-loader` -> `@esbuild-kit/core-utils`: no parent release fixes it, so `pnpm.overrides` maps `@esbuild-kit/core-utils>esbuild` to `^0.25.4` (dedupes with the esbuild drizzle-kit itself uses). drizzle-kit's bundled CLI never loads `@esbuild-kit/*`, and `pnpm db:generate` output is unchanged. The reason sits next to it under `pnpm.//overrides` because package.json has no comments.
+  - web-vitals 6 (#12): the app calls only `onCLS`, `onINP`, `onLCP`, `onFCP`, `onTTFB` with a `{ name, value }` callback. v5 removed `onFID` (unused), v6 changed type-only exports and attribution defaults (unused). Merged as is.
+  - vitest 4 fallout: `ReturnType<typeof vi.spyOn>` no longer carries the console signature, so `tests/unit/auth-error-logging.test.ts` names it with `MockInstance`; `vitest.config.ts` became `vitest.config.mts` (Vite 8 warns about ESM syntax in a CommonJS-loaded config) with `__dirname` replaced by `import.meta.url`.
 
 ## Status
 - [x] Step 1 implemented locally, all CI commands pass on Node 22 + pnpm 9.15.0.
@@ -52,6 +62,7 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 
 - [x] Final state (27 Sep 2026): `main` ci run https://github.com/omar16100/saas_template/actions/runs/36290599189 succeeded after #21; deploy runs succeed with the deploy job skipped (no Cloudflare secrets). https://omar16100.github.io/saas_template/ returns 200 (served from `gh-pages`, untouched).
 - Original 8 Dependabot PRs: #2 and #9 merged; #1 replaced by Dependabot with #11 (merged); #4, #5, #6, #7, #8 closed (eslint major ignored; hookform removed in #14; drizzle, zod, stripe superseded by #20, #19, #21).
+- [x] Step 8 implemented locally on `deps/security-alerts`: every CI command passes on Node 22 + pnpm 9.15.0 (frozen install, lint, typecheck, 32 unit tests, `drizzle-kit generate`, `build:worker`); `pnpm audit` reports 29 vulnerabilities on `main` and none on the branch; no locked package version falls inside any of the 26 advisories behind the 32 alerts. The built Worker was served locally with `opennextjs-cloudflare preview` (wrangler 4): `/`, `/pricing`, `/blog`, `/sign-in`, `/robots.txt`, `/sitemap.xml` return 200; `/api/auth/get-session` returns the handled 500 (`auth_request_failed`, no `BETTER_AUTH_SECRET` locally). `wrangler deploy --dry-run` passes for `preview` and `production`.
 
 ## Deviations
 - The Stripe `current_period_end` fix moved into PR 1 because stripe 18 (already installed) fails typecheck without it. The stripe 22 PR only changes the version and `apiVersion`.
@@ -59,10 +70,12 @@ Make `ci.yml` and `deploy.yml` pass on `main` (both failed on every push since 1
 
 ## Follow-ups for the owner (not done here)
 - `db/schema/auth.ts` lacks what the better-auth 1.7 plugins expect: the `twoFactor` table and `user.twoFactorEnabled` (twoFactor plugin) and `passkey.aaguid` (passkey plugin). Generate the expected schema with the better-auth CLI and reconcile before first deploy.
-- wrangler is on 3.x; `@opennextjs/cloudflare` 1.20 declares a peer of wrangler `^4.125.0` and warns that Next.js 16.1+ needs wrangler 4.59.2+. Upgrade before deploying.
+- ~~wrangler is on 3.x~~ Done in step 8 (wrangler 4.141.0). A real deploy with wrangler 4 has not been run (no Cloudflare secrets in the repo).
 - `components/turnstile.tsx` renders the widget only if `window.turnstile` already exists when the effect runs; with the async script this can miss. Needs an `onLoad` hook. No route calls `verifyTurnstile`.
 - `lib/rate-limit.ts` has no callers; the `audit_log` table is never written; no queue consumer handles `user.purge`.
 - `passkey.credentialId` in the schema vs the plugin's `credentialID` field name.
 - Root layout canonical `/` is inherited by pricing, blog index and auth pages.
 - Billing (pre-existing, found in the stripe review): pricing CTA env var names do not match `.env.example`; the Manage billing form receives JSON instead of a redirect; the webhook records the event before applying it and treats any insert error as a duplicate; subscription upserts ignore event ordering. Existing subscriptions created without `subscription_data.metadata.userId` or in flexible mode would need reconciliation.
-- Dependabot PRs opened during the sweep, not triaged: web-vitals 6 (#12, CI green), vitest 4 (#13, CI red: vitest 4 needs vite 6+).
+- ~~Dependabot PRs opened during the sweep~~ Done in step 8: web-vitals 6 (#12) merged, vitest 4 (#13) superseded by `deps/security-alerts`.
+- `@react-email/components` and every `@react-email/*` component package are deprecated on npm: react-email 6 moved the components into the `react-email` package, which also carries its CLI dependencies (esbuild, socket.io, tailwindcss 4). Decide between moving the five templates to `react-email` 6 and staying on the frozen 0.0.36; either way re-check the rendered HTML (1.0.x already changes the body wrapper).
+- Drop the `@esbuild-kit/core-utils>esbuild` override once drizzle-kit stops depending on `@esbuild-kit/esm-loader` (drizzle-kit 1.0.0-beta.22 no longer does).

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, type MockInstance } from "vitest";
 import { DrizzleQueryError } from "drizzle-orm";
 import { logBetterAuthEvent } from "@/lib/logger";
 
@@ -6,12 +6,15 @@ const TOKEN = "verification_token_must_not_be_logged";
 const { getCloudflareContext } = vi.hoisted(() => ({ getCloudflareContext: vi.fn() }));
 vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext }));
 
-function consoleOutput(spies: Array<ReturnType<typeof vi.spyOn>>) {
+// vitest 4 no longer infers argument types through ReturnType<typeof vi.spyOn>, so name the console signature.
+type ConsoleSpy = MockInstance<(...data: unknown[]) => void>;
+
+function consoleOutput(spies: ConsoleSpy[]) {
   return spies.flatMap((spy) => spy.mock.calls.map((call) => call.map((arg) => (typeof arg === "string" ? arg : JSON.stringify(arg))).join(" "))).join("\n");
 }
 
 describe("auth error logging", () => {
-  let spies: Array<ReturnType<typeof vi.spyOn>>;
+  let spies: ConsoleSpy[];
   beforeEach(() => {
     spies = (["log", "info", "warn", "error", "debug"] as const).map((m) => vi.spyOn(console, m).mockImplementation(() => {}));
   });
